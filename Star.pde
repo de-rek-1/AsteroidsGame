@@ -1,4 +1,18 @@
-class Star //note that this class does NOT extend Floater
+class Star
 {
-  //your code here
+  private float x;
+  private float y;
+  private int brightness;
+  public Star()
+  {
+    x = (float)(Math.random() * width);
+    y = (float)(Math.random() * height);
+    brightness = (int)(Math.random() * 255);
+  }
+
+  public void show()
+  {
+    stroke(brightness);
+    point(x, y);
+  }
 }
