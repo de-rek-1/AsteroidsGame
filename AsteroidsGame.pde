@@ -1,3 +1,4 @@
+ArrayList<Bullet> bullets = new ArrayList<Bullet>();
 ArrayList<Asteroid> asteroids;
 Spaceship ship;
 Star[] stars; 
@@ -28,10 +29,18 @@ class Asteroid extends Floater
     myPointDirection += rotSpeed;
     myCenterX += myXspeed;
     myCenterY += myYspeed;
-    if (myCenterX > width)  myCenterX = 0;
-    if (myCenterX < 0)      myCenterX = width;
-    if (myCenterY > height) myCenterY = 0;
-    if (myCenterY < 0)      myCenterY = height;
+    if (myCenterX > width){
+      myCenterX = 0;
+    }
+    if (myCenterX < 0){    
+      myCenterX = width;
+    }
+    if (myCenterY > height){ 
+      myCenterY = 0;
+    }
+    if (myCenterY < 0){   
+      myCenterY = height;
+    }
   }
   public double getX()
   {
@@ -43,12 +52,12 @@ class Asteroid extends Floater
     return myCenterY;
   }
 }
-
 public void setup()
 {
   size(800, 600);
-  asteroids = new ArrayList<Asteroid>();
+
   ship = new Spaceship();
+  asteroids = new ArrayList<Asteroid>();
   for (int i = 0; i < 5; i++) {
     asteroids.add(new Asteroid());
   }
@@ -60,23 +69,46 @@ public void setup()
 public void draw()
 {
   background(0);
-  for (Star s : stars)
-  {
+  for (Star s : stars) {
     s.show();
+  }
+  for (int i = bullets.size() - 1; i >= 0; i--) {
+    Bullet b = bullets.get(i);
+    b.move();
+    b.show();
+    if (b.myCenterX < 0 || b.myCenterX > width || b.myCenterY < 0 || b.myCenterY > height) {
+      bullets.remove(i);
+    }
   }
   for (int i = asteroids.size() - 1; i >= 0; i--) {
     Asteroid a = asteroids.get(i);
-    double dx = a.getX() - ship.getX();
-    double dy = a.getY() - ship.getY();
-    double distanceSquared = dx * dx + dy * dy;      
-    if (distanceSquared < 400) {   // 20 * 20
-      asteroids.remove(i);
+    boolean asteroidHit = false;
+    for (int j = bullets.size() - 1; j >= 0; j--) {
+      Bullet b = bullets.get(j);
+      double dx = a.getX() - b.myCenterX;
+      double dy = a.getY() - b.myCenterY;
+      double distanceSquared = dx*dx + dy*dy;
+      if (distanceSquared < 400) {
+        asteroids.remove(i);
+        bullets.remove(j);
+        asteroidHit = true;
+        break;
+      }
     }
-    else {
-      a.move();
-      a.show();
+
+    if (!asteroidHit) {
+      double dxShip = a.getX() - ship.getX();
+      double dyShip = a.getY() - ship.getY();
+      double distanceShipSq = dxShip*dxShip + dyShip*dyShip;
+
+      if (distanceShipSq < 400) {
+        asteroids.remove(i); 
+      } else {
+        a.move();
+        a.show();
+      }
+    }
   }
-}
   ship.move();
   ship.show();
 }
@@ -93,5 +125,8 @@ public void keyPressed()
   }
   if (key == 's' || key == 'S') {
     ship.hyperspace();
+  }
+  if (key == ' ') {
+    bullets.add(new Bullet(ship));
   }
 }
